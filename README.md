@@ -43,7 +43,7 @@ Simply open `index.html` in your favorite browser to start playing.
 
 ## 📷 Screenshot
 
-![Tic-Tac-Toe Screenshot](screenshot.png)
+![Tic-Tac-Toe Screenshot](https://raw.githubusercontent.com/anuradha40/Tic-Tac-Toe/refs/heads/main/TTT.png)
 
 ## ✨ Optional AI Mode
 
