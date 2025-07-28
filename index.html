@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tic Tac Toe - PvP & PvC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #fff;
+    user-select: none;
+  }
+  .container {
+    background: rgba(255,255,255,0.1);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(255,255,255,0.2);
+    width: 320px;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+  .mode-select {
+    margin-bottom: 1rem;
+  }
+  select {
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+  }
+  .scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+  .scoreboard div {
+    background: rgba(255,255,255,0.15);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    min-width: 70px;
+  }
+  .turn {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 8px;
+  }
+  .cell {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    height: 90px;
+    font-size: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 700;
+  }
+  .cell:hover:not(.disabled) {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.1);
+  }
+  .cell.disabled {
+    cursor: default;
+  }
+  .cell.win {
+    background: #4caf50;
+    color: #fff;
+    font-weight: 900;
+    box-shadow: 0 0 10px #4caf50;
+  }
+  /* Reset button styled as a modern pill-shaped button */
+button.reset-btn {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(38, 35, 255, 0.4);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+button.reset-btn:hover,
+button.reset-btn:focus {
+  background: linear-gradient(45deg, #2575fc, #6a11cb);
+  box-shadow: 0 6px 20px rgba(38, 35, 255, 0.7);
+  outline: none;
+}
+select {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 9999px;
+  border: none;
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #fff 50%),
+    linear-gradient(135deg, #fff 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) calc(1em + 2px),
+    calc(100% - 15px) calc(1em + 2px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  box-shadow: 0 4px 15px rgba(38, 35, 255, 0.4);
+}
+
+select:hover,
+select:focus {
+  box-shadow: 0 6px 20px rgba(38, 35, 255, 0.7);
+  outline: none;
+}
+
+/* Dropdown option styling - works in some browsers */
+select option {
+  background: #1e1e1e;
+  color: #eee;
+  font-weight: 500;
+}
+
+/* For Firefox to avoid white background in dropdown */
+@-moz-document url-prefix() {
+  select {
+    background-color: #2575fc !important;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="Tic Tac Toe game with Player vs Player and Player vs Computer modes">
+    <h1>Tic Tac Toe</h1>
+    <div class="mode-select">
+      <label for="modeSelect" style="font-weight:600; margin-right:8px;">Game Mode:</label>
+      <select id="modeSelect" aria-label="Select game mode">
+        <option value="pvp">Player vs Player</option>
+        <option value="pvc">Player vs Computer</option>
+      </select>
+    </div>
+    <div class="scoreboard" aria-live="polite">
+      <div id="scoreX">X: 0</div>
+      <div id="scoreO">O: 0</div>
+    </div>
+    <div class="turn" id="turn" aria-live="polite">Turn: X</div>
+    <div class="board" role="grid" aria-label="Game board">
+      <div class="cell" role="gridcell" data-index="0" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="1" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="2" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="3" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="4" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="5" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="6" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="7" tabindex="0"></div>
+      <div class="cell" role="gridcell" data-index="8" tabindex="0"></div>
+    </div>
+    <button class="reset-btn" aria-label="Reset Game">Reset Game</button>
+  </div>
+
+<script>
+  const cells = document.querySelectorAll('.cell');
+  const turnDisplay = document.getElementById('turn');
+  const scoreXDisplay = document.getElementById('scoreX');
+  const scoreODisplay = document.getElementById('scoreO');
+  const resetBtn = document.querySelector('.reset-btn');
+  const modeSelect = document.getElementById('modeSelect');
+
+  let board = Array(9).fill("");
+  let currentPlayer = "X";
+  let isGameActive = true;
+  let score = { X: 0, O: 0 };
+  let mode = modeSelect.value; // 'pvp' or 'pvc'
+
+  const winningCombinations = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+
+  function updateScoreboard() {
+    scoreXDisplay.textContent = `X: ${score.X}`;
+    scoreODisplay.textContent = `O: ${score.O}`;
+  }
+
+  function highlightWinningCells(indices) {
+    indices.forEach(i => cells[i].classList.add('win'));
+  }
+
+  function disableBoard() {
+    cells.forEach(cell => cell.classList.add('disabled'));
+  }
+
+  function enableBoard() {
+    cells.forEach(cell => cell.classList.remove('disabled', 'win'));
+  }
+
+  function updateTurnDisplay() {
+    if (mode === 'pvp') {
+      turnDisplay.textContent = `Turn: ${currentPlayer}`;
+    } else if (mode === 'pvc') {
+      if (currentPlayer === 'X') {
+        turnDisplay.textContent = "Your turn (X)";
+      } else {
+        turnDisplay.textContent = "Computer's turn (O)";
+      }
+    }
+  }
+
+  function checkWin() {
+    for (const combo of winningCombinations) {
+      const [a,b,c] = combo;
+      if (board[a] && board[a] === board[b] && board[b] === board[c]) {
+        return combo;
+      }
+    }
+    return null;
+  }
+
+  function checkDraw() {
+    return board.every(cell => cell !== "");
+  }
+
+  function handleResultValidation() {
+    const winCombo = checkWin();
+    if (winCombo) {
+      isGameActive = false;
+      highlightWinningCells(winCombo);
+      if (mode === 'pvc' && currentPlayer === 'O') {
+        turnDisplay.textContent = "Computer Wins! 💻";
+      } else if (mode === 'pvc' && currentPlayer === 'X') {
+        turnDisplay.textContent = "You Win! 🎉";
+      } else {
+        turnDisplay.textContent = `Player ${currentPlayer} Wins! 🎉`;
+      }
+      score[currentPlayer]++;
+      updateScoreboard();
+      disableBoard();
+      return true;
+    }
+    if (checkDraw()) {
+      isGameActive = false;
+      turnDisplay.textContent = "It's a Draw!";
+      return true;
+    }
+    return false;
+  }
+
+  function switchPlayer() {
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    updateTurnDisplay();
+  }
+
+  function computerMove() {
+    if (!isGameActive) return;
+    const emptyIndices = board.map((v,i) => v === "" ? i : null).filter(i => i !== null);
+    if (emptyIndices.length === 0) return;
+    // Random move
+    const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    board[move] = 'O';
+    const cell = cells[move];
+    cell.textContent = 'O';
+    cell.classList.add('disabled');
+    if (!handleResultValidation()) {
+      switchPlayer();
+    }
+  }
+
+  function handleCellClick(e) {
+    const idx = e.target.getAttribute('data-index');
+    if (!isGameActive || board[idx] !== "") return;
+
+    if (mode === 'pvc' && currentPlayer !== 'X') return; // block player if computer's turn
+
+    board[idx] = currentPlayer;
+    e.target.textContent = currentPlayer;
+    e.target.classList.add('disabled');
+
+    if (!handleResultValidation()) {
+      switchPlayer();
+      if (mode === 'pvc' && currentPlayer === 'O') {
+        turnDisplay.textContent = "Computer is thinking...";
+        setTimeout(computerMove, 600);
+      }
+    }
+  }
+
+  function resetGame() {
+    board.fill("");
+    isGameActive = true;
+    currentPlayer = "X";
+    enableBoard();
+    cells.forEach(cell => cell.textContent = "");
+    updateTurnDisplay();
+  }
+
+  // Handle mode change
+  modeSelect.addEventListener('change', () => {
+    mode = modeSelect.value;
+    resetGame();
+    if (mode === 'pvc' && currentPlayer === 'O') {
+      setTimeout(computerMove, 600);
+    }
+  });
+
+  cells.forEach(cell => {
+    cell.addEventListener('click', handleCellClick);
+    cell.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.target.click();
+      }
+    });
+  });
+
+  resetBtn.addEventListener('click', resetGame);
+
+  updateScoreboard();
+  updateTurnDisplay();
+</script>
+</body>
+</html>
