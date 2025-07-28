@@ -43,7 +43,7 @@ Simply open `index.html` in your favorite browser to start playing.
 
 ## 📷 Screenshot
 
-*(Insert a screenshot here showcasing the game board)*
+![Tic-Tac-Toe Screenshot](screenshot.png)
 
 ## ✨ Optional AI Mode
 
